@@ -112,22 +112,32 @@ public class ProductAgent extends Agent {
             // ACCEPT лучшему
             ACLMessage accept = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
             accept.addReceiver(bestWorker);
-            accept.setContent("Выбран слот " + bestDay + ":" + bestSlot
-                    + " для изделия " + product.getId());
+            accept.setContent(bestDay + ":" + bestSlot + ":" + product.getId());
+
+
             send(accept);
+
 
             // REJECT остальным
             for (AID proposer : proposers) {
-                if (proposer.equals(bestWorker)) continue;
+                if (!proposer.equals(bestWorker)) {
+                    ACLMessage reject = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+                    reject.addReceiver(proposer);
+                    reject.setContent("Ваше предложение отклонено для изделия " + product.getId());
+                    send(reject);
 
-                ACLMessage reject = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-                reject.addReceiver(proposer);
-                reject.setContent("Ваше предложение отклонено для изделия " + product.getId());
-                send(reject);
+                }
+
             }
 
             System.out.println("Отправлен ACCEPT " + bestWorker.getLocalName()
                     + " и REJECT остальным");
+
+            ACLMessage done = new ACLMessage(ACLMessage.INFORM);
+            done.addReceiver(new AID("coordinator", AID.ISLOCALNAME));
+
+            done.setContent("DONE:" + product.getId());
+            send(done);
         }
 
         @Override

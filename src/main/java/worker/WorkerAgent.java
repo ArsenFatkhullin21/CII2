@@ -3,6 +3,7 @@ package worker;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import utils.SlotInfo;
 
 public class WorkerAgent extends Agent {
 
@@ -22,31 +23,41 @@ public class WorkerAgent extends Agent {
             public void action() {
                 ACLMessage msg = receive();
                 if (msg != null) {
-                    System.out.println("Worker " + config.getId() +
-                            " получил запрос от " + msg.getSender().getLocalName()
-                            + ": " + msg.getContent());
-
-                    logic(msg);
-
                     switch (msg.getPerformative()) {
                         case ACLMessage.REQUEST:
+                            System.out.println("Worker " + config.getId() +
+                                    " получил запрос от " + msg.getSender().getLocalName()
+                                    + ": " + msg.getContent());
                             logic(msg); // ищем слот и шлём PROPOSE/REFUSE
                             break;
+
                         case ACLMessage.ACCEPT_PROPOSAL:
                             System.out.println("Worker " + config.getId()
                                     + " ПРИНЯТ: " + msg.getContent());
+
+                            SlotInfo inf = splitter(msg);
+
+                            weekSchedule[inf.getDay()][inf.getDay()] = 1;
                             break;
+
                         case ACLMessage.REJECT_PROPOSAL:
                             System.out.println("Worker " + config.getId()
                                     + " ОТКЛОНЁН: " + msg.getContent());
+
+//                            SlotInfo inf1 = splitter(msg);
+//
+//                            weekSchedule[inf1.getDay()][inf1.getDay()] = 0;
+                            break;
+
+                        default:
                             break;
                     }
-
                 } else {
                     block();
                 }
             }
         });
+
     }
 
     private void logic(ACLMessage msg) {
@@ -75,13 +86,24 @@ public class WorkerAgent extends Agent {
         if (hasFreeSlot) {
             reply.setPerformative(ACLMessage.PROPOSE);
             reply.setContent(day + ":" + slot);  // каждый агент шлёт свой day:slot
-            weekSchedule[day][slot] = 1;         // бронируем этот слот
+                  // бронируем этот слот
         } else {
             reply.setPerformative(ACLMessage.REFUSE);
             reply.setContent("NO_SLOT");
         }
 
         send(reply);
+    }
+
+    public SlotInfo splitter(ACLMessage msg) {
+        String content = msg.getContent();      // "0:1:w1"
+        String[] contentArray = content.split(":");
+
+        int day = Integer.parseInt(contentArray[0]);
+        int slot = Integer.parseInt(contentArray[1]);
+        String workerName = contentArray[2];
+
+        return new SlotInfo(day, slot, workerName);
     }
 
 }

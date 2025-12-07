@@ -26,30 +26,31 @@ public class MainBoot {
         List<Product> products = productsFile.getProducts();
         List<Worker>  workers  = workersFile.getWorkers();
 
-        // 2. Поднимаем платформу программно (без Boot.main)
         Runtime rt = Runtime.instance();
-        Profile profile = new ProfileImpl();
-        profile.setParameter(Profile.GUI, "true"); // чтобы был RMA
-        AgentContainer mainContainer = rt.createMainContainer(profile);
+        AgentContainer main = rt.createMainContainer(new ProfileImpl());
 
-        // 3. Создаём работников
+// 1) запускаем всех работников
         for (Worker w : workers) {
-            AgentController ac = mainContainer.createNewAgent(
-                    w.getId(),                            // имя агента на платформе
-                    "worker.WorkerAgent",                 // FQCN твоего WorkerAgent
-                    new Object[]{w}                       // аргументы в setup()
-            );
-            ac.start();
+            main.createNewAgent(
+                    w.getId(),                     // уникальное имя агента
+                    "worker.WorkerAgent",
+                    new Object[]{w}
+            ).start();
         }
 
-        // 4. Создаём изделия
-        for (Product p : products) {
-            AgentController ac = mainContainer.createNewAgent(
-                    p.getId(),
-                    "product.ProductAgent",               // FQCN твоего ProductAgent
-                    new Object[]{p, workers}              // изделию можно передать список работников
-            );
-            ac.start();
-        }
+// 2) координатор получает весь список изделий
+        main.createNewAgent(
+                "coordinator",
+                "coordinator.MainCoordinatorAgent",
+                new Object[]{products, workers}
+        ).start();
+
+// 3) запускаем только первое изделие из списка
+        Product first = products.get(0);
+        main.createNewAgent(
+                first.getId(),
+                "product.ProductAgent",
+                new Object[]{first, workers}
+        ).start();
     }
 }
