@@ -1,5 +1,7 @@
 package utils;
 
+import jade.lang.acl.ACLMessage;
+
 public class SlotInfo {
     private int day;
     private int slot;
@@ -35,5 +37,16 @@ public class SlotInfo {
 
     public void setWorkerName(String workerName) {
         this.workerName = workerName;
+    }
+
+    public static SlotInfo splitter(ACLMessage msg) {
+        String content = msg.getContent();      // "0:1:w1"
+        String[] contentArray = content.split(":");
+
+        int day = Integer.parseInt(contentArray[0]);
+        int slot = Integer.parseInt(contentArray[1]);
+        String workerName = contentArray[2];
+
+        return new SlotInfo(day, slot, workerName);
     }
 }
