@@ -44,11 +44,18 @@ public class ProductAgent extends Agent {
 
         @Override
         public void onStart() {
+            // просто смотрим, не вынимая
+            String skill = product.getRequiredSkills().peek();
+            if (skill == null) {
+                finishedSelection = true;
+                return;
+            }
+
             ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-            msg.setContent("Нужен столяр для изделия " + product.getId());
+            msg.setContent("Нужен " + skill + " для изделия " + product.getId());
 
             for (Worker w : allWorkers) {
-                if (w.getSkills().contains("Столяр")) {
+                if (w.getSkills().contains(skill)) {
                     msg.addReceiver(new AID(w.getId(), AID.ISLOCALNAME));
                     expectedReplies++;
                 }
@@ -56,10 +63,12 @@ public class ProductAgent extends Agent {
 
             if (expectedReplies > 0) {
                 send(msg);
-                System.out.println("Product " + product.getId() + " отправил запрос столярам");
+                System.out.println("Product " + product.getId()
+                        + " отправил запрос работникам с навыком " + skill);
             }
             sent = true;
         }
+
 
         @Override
         public void action() {
@@ -95,7 +104,11 @@ public class ProductAgent extends Agent {
                 }
 
                 if (sent && replies >= expectedReplies) {
-                    sendDecisions();
+                    try {
+                        sendDecisions();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                     finishedSelection = true;
                 }
             } else {
@@ -103,12 +116,38 @@ public class ProductAgent extends Agent {
             }
         }
 
-        private void sendDecisions() {
+        private void sendDecisions() throws InterruptedException {
             if (bestWorker == null) {
                 System.out.println("Подходящих предложений нет");
                 return;
             }
 
+            // 1) ACCEPT лучшему и REJECT остальным
+            senfAcceptReject();
+            Thread.sleep(500);
+
+
+            // 2) помечаем текущий навык как выполненный
+            String doneSkill = product.getRequiredSkills().poll();
+            System.out.println("Для изделия " + product.getId()
+                    + " выполнен этап: " + doneSkill);
+
+            // 3) есть ещё этапы?
+            if (!product.getRequiredSkills().isEmpty()) {
+                // запускаем следующий поиск (следующий skill в очереди)
+                myAgent.addBehaviour(new RequestWorkersBehaviour());
+            } else {
+                System.out.println("Изделие " + product.getId() + " полностью спланировано");
+
+                // 4) только теперь шлём DONE координатору
+                ACLMessage done = new ACLMessage(ACLMessage.INFORM);
+                done.addReceiver(new AID("coordinator", AID.ISLOCALNAME));
+                done.setContent("DONE:" + product.getId());
+                send(done);
+            }
+        }
+
+        private void senfAcceptReject(){
             // ACCEPT лучшему
             ACLMessage accept = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
             accept.addReceiver(bestWorker);
@@ -132,12 +171,6 @@ public class ProductAgent extends Agent {
 
             System.out.println("Отправлен ACCEPT " + bestWorker.getLocalName()
                     + " и REJECT остальным");
-
-            ACLMessage done = new ACLMessage(ACLMessage.INFORM);
-            done.addReceiver(new AID("coordinator", AID.ISLOCALNAME));
-
-            done.setContent("DONE:" + product.getId());
-            send(done);
         }
 
         @Override

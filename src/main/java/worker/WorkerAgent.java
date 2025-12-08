@@ -28,34 +28,28 @@ public class WorkerAgent extends Agent {
                             System.out.println("Worker " + config.getId() +
                                     " получил запрос от " + msg.getSender().getLocalName()
                                     + ": " + msg.getContent());
-                            logic(msg); // ищем слот и шлём PROPOSE/REFUSE
+                            logic(msg);
                             break;
 
                         case ACLMessage.ACCEPT_PROPOSAL:
                             System.out.println("Worker " + config.getId()
                                     + " ПРИНЯТ: " + msg.getContent());
 
-                            SlotInfo inf = splitter(msg);
-
-                            weekSchedule[inf.getDay()][inf.getDay()] = 1;
+                            SlotInfo info = splitter(msg); // day, slot, productId
+                            weekSchedule[info.getDay()][info.getSlot()] = 1;  // теперь слот ЗАНЯТ
                             break;
 
                         case ACLMessage.REJECT_PROPOSAL:
                             System.out.println("Worker " + config.getId()
                                     + " ОТКЛОНЁН: " + msg.getContent());
 
-//                            SlotInfo inf1 = splitter(msg);
-//
-//                            weekSchedule[inf1.getDay()][inf1.getDay()] = 0;
-                            break;
-
-                        default:
                             break;
                     }
                 } else {
                     block();
                 }
             }
+
         });
 
     }
@@ -81,17 +75,15 @@ public class WorkerAgent extends Agent {
             }
         }
 
-        // 2. Формируем ОДИН ответ на сообщение
         ACLMessage reply = msg.createReply();
         if (hasFreeSlot) {
             reply.setPerformative(ACLMessage.PROPOSE);
-            reply.setContent(day + ":" + slot);  // каждый агент шлёт свой day:slot
-                  // бронируем этот слот
+            reply.setContent(day + ":" + slot + ":" + config.getId()); // например, "0:1:w3"
+
         } else {
             reply.setPerformative(ACLMessage.REFUSE);
             reply.setContent("NO_SLOT");
         }
-
         send(reply);
     }
 

@@ -1,17 +1,18 @@
 package product;
 
 import java.util.List;
+import java.util.Queue;
 
 public class Product {
     private String id;
     private String name;
-    private List<String> requiredSkills;
+    private Queue<String> requiredSkills;
     private boolean busy;
 
     public Product() {
     }
 
-    public Product(String id, String name, List<String> requiredSkills, boolean busy) {
+    public Product(String id, String name, Queue<String> requiredSkills, boolean busy) {
         this.id = id;
         this.name = name;
         this.requiredSkills = requiredSkills;
@@ -34,11 +35,11 @@ public class Product {
         this.name = name;
     }
 
-    public List<String> getRequiredSkills() {
+    public Queue<String> getRequiredSkills() {
         return requiredSkills;
     }
 
-    public void setRequiredSkills(List<String> requiredSkills) {
+    public void setRequiredSkills(Queue<String> requiredSkills) {
         this.requiredSkills = requiredSkills;
     }
 
