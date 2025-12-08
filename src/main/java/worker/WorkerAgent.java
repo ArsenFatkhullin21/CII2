@@ -56,36 +56,51 @@ public class WorkerAgent extends Agent {
 
     private void logic(ACLMessage msg) {
 
+        String[] parts = msg.getContent().split(":");
+        int minDay  = Integer.parseInt(parts[0]);   // lastDay изделия
+        int minSlot = Integer.parseInt(parts[1]);   // lastSlot изделия
+
         int day = -1;
         int slot = -1;
         boolean hasFreeSlot = false;
 
-        // 1. Ищем первый свободный слот по всей неделе
-        for (int d = 0; d < weekSchedule.length; d++) {                // дни
-            for (int s = 0; s < weekSchedule[d].length; s++) {         // слоты в дне
-                if (weekSchedule[d][s] == 0) {                         // 0 = свободен
-                    hasFreeSlot = true;
-                    day = d;
-                    slot = s;
-                    break;
+        // 1. Ищем первый ПОДХОДЯЩИЙ свободный слот
+        for (int d = 0; d < weekSchedule.length; d++) {
+            for (int s = 0; s < weekSchedule[d].length; s++) {
+                if (weekSchedule[d][s] == 0) {
+                    boolean isAfter =
+                            d > minDay || (d == minDay && s > minSlot);
+                    if (isAfter) {
+                        hasFreeSlot = true;
+                        day = d;
+                        slot = s;
+                        break;
+                    }
                 }
             }
-            if (hasFreeSlot) {
-                break; // выходим и из внешнего цикла, слот найден
-            }
+            if (hasFreeSlot) break;
         }
 
         ACLMessage reply = msg.createReply();
         if (hasFreeSlot) {
             reply.setPerformative(ACLMessage.PROPOSE);
-            reply.setContent(day + ":" + slot + ":" + config.getId()); // например, "0:1:w3"
+            reply.setContent(day + ":" + slot + ":" + config.getId());
 
+            // ЛОГ: что предлагает этот работник
+            System.out.println("Worker " + config.getId()
+                    + " предлагает слот день=" + day + " слот=" + slot);
         } else {
             reply.setPerformative(ACLMessage.REFUSE);
             reply.setContent("NO_SLOT");
+
+            System.out.println("Worker " + config.getId()
+                    + " не нашёл подходящего свободного слота");
         }
+
         send(reply);
     }
+
+
 
     public SlotInfo splitter(ACLMessage msg) {
         String content = msg.getContent();      // "0:1:w1"

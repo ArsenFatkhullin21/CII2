@@ -52,7 +52,8 @@ public class ProductAgent extends Agent {
             }
 
             ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-            msg.setContent("Нужен " + skill + " для изделия " + product.getId());
+            msg.setContent(product.getLastDay() + ":" + product.getLastSlot() + ":" + skill
+                    + ":" + product.getId());   // например "0:0:Сварщик:p1"
 
             for (Worker w : allWorkers) {
                 if (w.getSkills().contains(skill)) {
@@ -83,19 +84,27 @@ public class ProductAgent extends Agent {
 
                 if (reply.getPerformative() == ACLMessage.PROPOSE) {
                     String[] parts = reply.getContent().split(":");
-                    int day = Integer.parseInt(parts[0]);
+                    int day  = Integer.parseInt(parts[0]);
                     int slot = Integer.parseInt(parts[1]);
 
-                    System.out.println("Получено предложение от "
-                            + reply.getSender().getLocalName()
-                            + " день=" + day + " слот=" + slot);
+                    // предложение действительно ТОЛЬКО если оно не раньше уже занятых этапов
+                    boolean isAfterLast =
+                            day > product.getLastDay() ||
+                                    (day == product.getLastDay() && slot > product.getLastSlot());
 
-                    proposers.add(reply.getSender());
+                    if (isAfterLast) {
+                        proposers.add(reply.getSender());
 
-                    if (day < bestDay || (day == bestDay && slot < bestSlot)) {
-                        bestDay = day;
-                        bestSlot = slot;
-                        bestWorker = reply.getSender();
+                        // среди всех подходящих выбираем самый ранний
+                        if (day < bestDay || (day == bestDay && slot < bestSlot)) {
+                            bestDay = day;
+                            bestSlot = slot;
+                            bestWorker = reply.getSender();
+                        }
+                    } else {
+                        // игнорируем слоты, которые приходятся раньше уже выполненной работы
+                        System.out.println("Предложение от " + reply.getSender().getLocalName()
+                                + " день=" + day + " слот=" + slot + " отклонено по времени");
                     }
 
                 } else if (reply.getPerformative() == ACLMessage.REFUSE) {
@@ -124,8 +133,10 @@ public class ProductAgent extends Agent {
 
             // 1) ACCEPT лучшему и REJECT остальным
             senfAcceptReject();
-            Thread.sleep(500);
+            Thread.sleep(100);
 
+            // обновляем «хвост» изделия:
+            product.setLast(bestDay, bestSlot);
 
             // 2) помечаем текущий навык как выполненный
             String doneSkill = product.getRequiredSkills().poll();
