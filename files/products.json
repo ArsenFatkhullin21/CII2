@@ -11,6 +11,174 @@
       "name": "Изделие 2",
       "requiredSkills": ["Столяр", "Сварщик", "Маляр"],
       "busy": 0
+    },
+    {
+      "id": "p3",
+      "name": "Изделие 3",
+      "requiredSkills": ["Сварщик", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p4",
+      "name": "Изделие 4",
+      "requiredSkills": ["Столяр"],
+      "busy": 0
+    },
+    {
+      "id": "p5",
+      "name": "Изделие 5",
+      "requiredSkills": ["Столяр", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p6",
+      "name": "Изделие 6",
+      "requiredSkills": ["Столяр", "Сварщик", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p7",
+      "name": "Изделие 7",
+      "requiredSkills": ["Сварщик", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p8",
+      "name": "Изделие 8",
+      "requiredSkills": ["Сварщик"],
+      "busy": 0
+    },
+    {
+      "id": "p9",
+      "name": "Изделие 9",
+      "requiredSkills": ["Столяр"],
+      "busy": 0
+    },
+    {
+      "id": "p10",
+      "name": "Изделие 10",
+      "requiredSkills": ["Столяр", "Сварщик", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p11",
+      "name": "Изделие 11",
+      "requiredSkills": ["Столяр", "Сварщик", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p12",
+      "name": "Изделие 12",
+      "requiredSkills": ["Столяр", "Сварщик"],
+      "busy": 0
+    },
+    {
+      "id": "p13",
+      "name": "Изделие 13",
+      "requiredSkills": ["Сварщик", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p14",
+      "name": "Изделие 14",
+      "requiredSkills": ["Столяр"],
+      "busy": 0
+    },
+    {
+      "id": "p15",
+      "name": "Изделие 15",
+      "requiredSkills": ["Столяр", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p16",
+      "name": "Изделие 16",
+      "requiredSkills": ["Сварщик", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p17",
+      "name": "Изделие 17",
+      "requiredSkills": ["Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p18",
+      "name": "Изделие 18",
+      "requiredSkills": ["Сварщик"],
+      "busy": 0
+    },
+    {
+      "id": "p19",
+      "name": "Изделие 19",
+      "requiredSkills": ["Столяр"],
+      "busy": 0
+    },
+    {
+      "id": "p20",
+      "name": "Изделие 20",
+      "requiredSkills": ["Столяр", "Сварщик", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p21",
+      "name": "Изделие 21",
+      "requiredSkills": ["Столяр", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p22",
+      "name": "Изделие 22",
+      "requiredSkills": ["Сварщик", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p23",
+      "name": "Изделие 23",
+      "requiredSkills": ["Столяр"],
+      "busy": 0
+    },
+    {
+      "id": "p24",
+      "name": "Изделие 24",
+      "requiredSkills": ["Столяр", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p25",
+      "name": "Изделие 25",
+      "requiredSkills": ["Сварщик", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p26",
+      "name": "Изделие 26",
+      "requiredSkills": ["Сварщик", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p27",
+      "name": "Изделие 27",
+      "requiredSkills": ["Сварщик"],
+      "busy": 0
+    },
+    {
+      "id": "p28",
+      "name": "Изделие 28",
+      "requiredSkills": ["Столяр"],
+      "busy": 0
+    },
+    {
+      "id": "p29",
+      "name": "Изделие 29",
+      "requiredSkills": ["Столяр", "Сварщик", "Маляр"],
+      "busy": 0
+    },
+    {
+      "id": "p30",
+      "name": "Изделие 30",
+      "requiredSkills": ["Маляр"],
+      "busy": 0
     }
   ]
 }

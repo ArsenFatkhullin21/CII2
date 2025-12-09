@@ -3,6 +3,7 @@ package worker;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import utils.ExcelLogger;
 import utils.SlotInfo;
 
 public class WorkerAgent extends Agent {
@@ -16,7 +17,7 @@ public class WorkerAgent extends Agent {
         config = (Worker) args[0];
         weekSchedule = config.getWeekSchedule();
 
-        System.out.println("Worker " + config.getId() + " стартовал: " + getAID().getName());
+        log("Worker " + config.getId() + " стартовал: " + getAID().getName());
 
         addBehaviour(new CyclicBehaviour(this) {
             @Override
@@ -25,14 +26,14 @@ public class WorkerAgent extends Agent {
                 if (msg != null) {
                     switch (msg.getPerformative()) {
                         case ACLMessage.REQUEST:
-                            System.out.println("Worker " + config.getId() +
+                            log("Worker " + config.getId() +
                                     " получил запрос от " + msg.getSender().getLocalName()
                                     + ": " + msg.getContent());
                             logic(msg);
                             break;
 
                         case ACLMessage.ACCEPT_PROPOSAL:
-                            System.out.println("Worker " + config.getId()
+                            log("Worker " + config.getId()
                                     + " ПРИНЯТ: " + msg.getContent());
 
                             SlotInfo info = splitter(msg); // day, slot, productId
@@ -40,7 +41,7 @@ public class WorkerAgent extends Agent {
                             break;
 
                         case ACLMessage.REJECT_PROPOSAL:
-                            System.out.println("Worker " + config.getId()
+                            log("Worker " + config.getId()
                                     + " ОТКЛОНЁН: " + msg.getContent());
 
                             break;
@@ -87,13 +88,13 @@ public class WorkerAgent extends Agent {
             reply.setContent(day + ":" + slot + ":" + config.getId());
 
             // ЛОГ: что предлагает этот работник
-            System.out.println("Worker " + config.getId()
+            log("Worker " + config.getId()
                     + " предлагает слот день=" + day + " слот=" + slot);
         } else {
             reply.setPerformative(ACLMessage.REFUSE);
             reply.setContent("NO_SLOT");
 
-            System.out.println("Worker " + config.getId()
+            log("Worker " + config.getId()
                     + " не нашёл подходящего свободного слота");
         }
 
@@ -111,6 +112,12 @@ public class WorkerAgent extends Agent {
         String workerName = contentArray[2];
 
         return new SlotInfo(day, slot, workerName);
+    }
+
+    private void log(String message) {
+        String msg = message;
+        System.out.println(msg);
+        ExcelLogger.log(getLocalName(), msg);
     }
 
 

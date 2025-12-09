@@ -5,6 +5,7 @@ import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import utils.ExcelLogger;
 import utils.SlotInfo;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class MachineAgent extends Agent {
         config = (Machine) args[0];
         weekSchedule = config.getWeekSchedule();
 
-        System.out.println("Machine " + config.getId() + " стартовал: " + getAID().getName());
+        log("Machine " + config.getId() + " стартовал: " + getAID().getName());
 
         addBehaviour(new CyclicBehaviour(this) {
             @Override
@@ -35,7 +36,7 @@ public class MachineAgent extends Agent {
                         case ACLMessage.ACCEPT_PROPOSAL:
                             SlotInfo info = SlotInfo.splitter(msg);
                             weekSchedule[info.getDay()][info.getSlot()] = 1;
-                            System.out.println("Machine " + config.getId()
+                            log("Machine " + config.getId()
                                     + " забронировал " + info.getDay() + ":" + info.getSlot());
                             break;
                         case ACLMessage.REJECT_PROPOSAL:
@@ -66,12 +67,12 @@ public class MachineAgent extends Agent {
         if (hasFree) {
             reply.setPerformative(ACLMessage.PROPOSE);
             reply.setContent(day + ":" + slot + ":" + config.getId());
-            System.out.println("Machine " + config.getId()
+            log("Machine " + config.getId()
                     + " предлагает слот день=" + day + " слот=" + slot);
         } else {
             reply.setPerformative(ACLMessage.REFUSE);
             reply.setContent("NO_SLOT");
-            System.out.println("Machine " + config.getId()
+            log("Machine " + config.getId()
                     + " не имеет свободного слота " + day + ":" + slot);
         }
         send(reply);
@@ -80,5 +81,10 @@ public class MachineAgent extends Agent {
 
 
 
+    private void log(String message) {
+        String msg = message;
+        System.out.println(msg);
+        ExcelLogger.log(getLocalName(), msg);
+    }
 }
 

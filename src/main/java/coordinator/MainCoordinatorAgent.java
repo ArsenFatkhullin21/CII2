@@ -4,9 +4,9 @@ import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentController;
-import jade.wrapper.AgentContainer;
 import machine.Machine;
 import product.Product;
+import utils.ExcelLogger;
 import worker.Worker;
 
 import java.util.List;
@@ -33,13 +33,14 @@ public class MainCoordinatorAgent extends Agent {
                         msg.getContent().startsWith("DONE:")) {
 
                     String doneId = msg.getContent().substring("DONE:".length());
-                    System.out.println("Coordinator: завершено изделие " + doneId);
+                    log("Coordinator: завершено изделие " + doneId);
 
                     currentIndex++;
                     if (currentIndex < products.size()) {
                         startProduct(products.get(currentIndex));
                     } else {
-                        System.out.println("Coordinator: все изделия обработаны");
+                        log("Coordinator: все изделия обработаны");
+                        ExcelLogger.saveDefault();
                     }
                 } else {
                     block();
@@ -56,9 +57,15 @@ public class MainCoordinatorAgent extends Agent {
                     new Object[]{p, workers, machines}
             );
             ac.start();
-            System.out.println("Coordinator: запущено изделие " + p.getId());
+            log("Coordinator: запущено изделие " + p.getId());
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void log(String message) {
+        String msg = message;
+        System.out.println(msg);
+        ExcelLogger.log(getLocalName(), msg);
     }
 }
