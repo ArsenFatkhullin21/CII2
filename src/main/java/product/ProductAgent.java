@@ -6,6 +6,7 @@ import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import machine.Machine;
+import utils.ExcelLogger;
 import worker.Worker;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class ProductAgent extends Agent {
         allMachines = (List<Machine>) args[2];
 
 
-        System.out.println("Product " + product.getId() + " стартовал: " + getAID().getName());
+        log("Product " + product.getId() + " стартовал: " + getAID().getName());
         addBehaviour(new RequestWorkersBehaviour());
     }
 
@@ -72,10 +73,10 @@ public class ProductAgent extends Agent {
 
             if (expectedReplies > 0) {
                 send(msg);
-                System.out.println("Product " + product.getId()
+                log("Product " + product.getId()
                         + " отправил запрос работникам с навыком " + skill);
             } else {
-                System.out.println("Нет работников с навыком " + skill);
+                log("Нет работников с навыком " + skill);
                 finished = true;
             }
             sent = true;
@@ -97,7 +98,7 @@ public class ProductAgent extends Agent {
                     int day  = Integer.parseInt(parts[0]);
                     int slot = Integer.parseInt(parts[1]);
 
-                    System.out.println("Получено предложение от "
+                    log("Получено предложение от "
                             + reply.getSender().getLocalName()
                             + " день=" + day + " слот=" + slot);
 
@@ -111,7 +112,7 @@ public class ProductAgent extends Agent {
                     }
 
                 } else if (reply.getPerformative() == ACLMessage.REFUSE) {
-                    System.out.println("Агент " + reply.getSender().getLocalName()
+                    log("Агент " + reply.getSender().getLocalName()
                             + " отказался: " + reply.getContent());
                 }
 
@@ -142,6 +143,11 @@ public class ProductAgent extends Agent {
         }
     }
 
+    private void log(String message) {
+        String msg = message;
+        System.out.println(msg);
+        ExcelLogger.log(getLocalName(), msg);
+    }
 
     private class RequestMachinesBehaviour extends Behaviour {
 
@@ -182,7 +188,7 @@ public class ProductAgent extends Agent {
 
             if (expectedReplies > 0) {
                 send(msg);
-                System.out.println("Product " + product.getId()
+                log("Product " + product.getId()
                         + " проверяет станки для работника "
                         + worker.workerAID.getLocalName()
                         + " слот=" + worker.day + ":" + worker.slot);
@@ -267,7 +273,7 @@ public class ProductAgent extends Agent {
 
             if (!waitingForMachines) {
                 if (index >= workerOffers.size()) {
-                    System.out.println("Для изделия " + product.getId()
+                    log("Для изделия " + product.getId()
                             + " не найдено пары Работник+Станок");
                     finished = true;
                     return;
@@ -302,7 +308,7 @@ public class ProductAgent extends Agent {
         }
 
         private void finalizePair() {
-            System.out.println("Изделие " + product.getId()
+            log("Изделие " + product.getId()
                     + " выбрало Работника " + chosenWorker.workerAID.getLocalName()
                     + " и Станок " + chosenMachine.getLocalName()
                     + " слот=" + chosenDay + ":" + chosenSlot);
@@ -334,13 +340,21 @@ public class ProductAgent extends Agent {
 
             // этап выполнен
             String doneSkill = product.getRequiredSkills().poll();
-            System.out.println("Для изделия " + product.getId()
+            log("Для изделия " + product.getId()
                     + " выполнен этап: " + doneSkill);
+            ExcelLogger.recordWorkerBooking(
+                    chosenWorker.workerAID.getLocalName(),
+                    chosenDay,
+                    chosenSlot,
+                    product.getId(),
+                    chosenMachine.getLocalName(),
+                    doneSkill
+            );
 
             if (!product.getRequiredSkills().isEmpty()) {
                 addBehaviour(new RequestWorkersBehaviour());
             } else {
-                System.out.println("Изделие " + product.getId() + " полностью спланировано");
+                log("Изделие " + product.getId() + " полностью спланировано");
                 if (!doneSent) {                    // защита от повторного DONE
                     doneSent = true;
                     ACLMessage done = new ACLMessage(ACLMessage.INFORM);
